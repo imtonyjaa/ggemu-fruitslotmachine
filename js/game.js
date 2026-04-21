@@ -33526,8 +33526,8 @@ function getJsonFromUrl() {
     try {
         this.musicPlaying = this.soundPlaying = SOUNDS_ENABLED,
             loadAllGameData(),
-            null != getProfileVar("snd") && (this.soundPlaying = SOUNDS_ENABLED && !0 === getProfileVar("snd")),
-            null != getProfileVar("msc") && (this.musicPlaying = SOUNDS_ENABLED && !0 === getProfileVar("msc"))
+            (this.soundPlaying = SOUNDS_ENABLED),
+            (this.musicPlaying = SOUNDS_ENABLED)
     } catch (b) {
         this.musicPlaying = this.soundPlaying = SOUNDS_ENABLED
     }
@@ -34244,8 +34244,8 @@ Splash.prototype = {
         game.canvas.id = "gameCanvas";
         document.getElementById("gameCanvas").style.position = "fixed";
         this.game.stage.backgroundColor = 0;
-        game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
-        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+        this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
         this.scale.pageAlignHorizontally = !0;
         this.scale.pageAlignVertically = !0;
         game.device.desktop || window.addEventListener("resize", function () {
@@ -34254,8 +34254,8 @@ Splash.prototype = {
         loadSplash(this.game);
         setCorrectResolution();
         window.addEventListener("resize", function () {
-            game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
-            game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+            game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
             game.scale.pageAlignHorizontally = !0;
             game.scale.pageAlignVertically = !0;
             game.scale.refresh()
@@ -34402,7 +34402,8 @@ Preloader.prototype = {
             this.game.world.remove(imgBtn),
             ScenesTransitions.hideSceneAlpha(percentageText),
             sceneLanguages = new SceneLanguages,
-            sceneLanguages.ShowAnimated())
+            language = "en",
+            sceneLanguages.OnLanguageSelected())
     }
 };
 function saveAllGameData() {
@@ -37315,7 +37316,7 @@ function getUrlParameterByName(a, b) {
 function createGamesnacksButton() {
     var a = document.createElement("button");
     a.id = "audioButton";
-    a.textContent = "AUDIO: " + ("true" === localStorage.getItem("soundState"));
+    a.textContent = "AUDIO: " + (localStorage.getItem("soundState") !== "false");
     var b = document.createElement("style");
     b.textContent = "\n        #audioButton {\n            position: fixed;\n            top: 10px;\n            right: 10px;\n            padding: 10px 20px;\n            background-color: #007bff;\n            color: white;\n            border: none;\n            border-radius: 5px;\n            cursor: pointer;\n            z-index: 1000;\n        }\n    ";
     document.head.appendChild(b);
@@ -37328,7 +37329,7 @@ function createGamesnacksButton() {
     })
 }
 if ("undefined" == typeof GameSnacks || null == GameSnacks)
-    soundState = "true" === localStorage.getItem("soundState"),
+    soundState = !0,
         createGamesnacksButton(),
         console.warn("GameSnacks is undefined"),
         GameSnacks = {
@@ -37402,8 +37403,12 @@ function showInterstitialAd(a, b, c) {
 window.serverCoinsValue = undefined;
 var _getProfileVar = getProfileVar;
 getProfileVar = function(a) {
-    if (a === "iCoinsValue" && typeof window.serverCoinsValue !== 'undefined') {
-        return window.serverCoinsValue;
+    if (a === "iCoinsValue") {
+        if (typeof window.serverCoinsValue !== 'undefined') {
+            return window.serverCoinsValue;
+        } else if (typeof window.GGEMU === 'undefined') {
+            return typeof GameData !== 'undefined' && typeof GameData.DEFAULT_COINS !== 'undefined' ? GameData.DEFAULT_COINS : 1500;
+        }
     }
     return _getProfileVar(a);
 };

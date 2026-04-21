@@ -113,6 +113,15 @@
                 window.GGEMU.startLive().catch(function(e) { console.warn(e); });
             }
             
+            var recoverAudio = function() {
+                var g = window.game;
+                if (g && g.sound && g.sound.context && g.sound.context.state === 'suspended') {
+                    g.sound.context.resume();
+                }
+            };
+            window.addEventListener('click', recoverAudio, true);
+            window.addEventListener('touchstart', recoverAudio, true);
+            
             var script = document.createElement('script');
             script.src = 'http://localhost:3000/api/ggemu-sdk.js';
             script.async = true;
