@@ -69,7 +69,7 @@
         <span style="font-family: 'gameFont', Arial, sans-serif;"></span>
     </div>
     <script>
-        (function() {
+        (function () {
             var ggemuInited = false;
             function initGGEMU() {
                 if (ggemuInited) return;
@@ -79,24 +79,24 @@
                     return;
                 }
                 ggemuInited = true;
-                
+
                 var canvas = g.canvas;
                 var masterGain = null;
                 if (g.sound && g.sound.masterGain) {
                     masterGain = g.sound.masterGain;
                 }
-                
+
                 window.GGEMU.init({
                     debug: false,
                     parentOrigin: '*',
                 });
-                
+
                 window.GGEMU.registerCanvas(canvas);
                 if (masterGain) {
                     window.GGEMU.registerAudioNode(masterGain);
                 }
 
-                window.GGEMU.on('ggemu:bag-updated', function(payload) {
+                window.GGEMU.on('ggemu:bag-updated', function (payload) {
                     if (payload && payload.bag && typeof payload.bag.bag_count !== 'undefined') {
                         var serverCoins = Number(payload.bag.bag_count);
                         if (typeof window.syncGcoins === 'function') {
@@ -108,12 +108,12 @@
                 window.GGEMU.setReady({
                     demo: 'fruit-slot-machine',
                 });
-                
-                try { window.GGEMU.getBagStatus().catch(function(e) { console.warn(e); }); } catch (e) { console.warn(e); }
-                try { window.GGEMU.startLive().catch(function(e) { console.warn(e); }); } catch (e) { console.warn(e); }
+
+                try { window.GGEMU.getBagStatus().catch(function (e) { console.warn(e); }); } catch (e) { console.warn(e); }
+                try { window.GGEMU.startLive().catch(function (e) { console.warn(e); }); } catch (e) { console.warn(e); }
             }
-            
-            var recoverAudio = function() {
+
+            var recoverAudio = function () {
                 var g = window.game;
                 if (g && g.sound && g.sound.context && g.sound.context.state === 'suspended') {
                     g.sound.context.resume();
@@ -121,11 +121,11 @@
             };
             window.addEventListener('click', recoverAudio, true);
             window.addEventListener('touchstart', recoverAudio, true);
-            
+
             var script = document.createElement('script');
-            script.src = 'http://localhost:3000/api/ggemu-sdk.js';
+            script.src = 'https://ggemu.com/api/ggemu-sdk.js';
             script.async = true;
-            script.onload = function() {
+            script.onload = function () {
                 setTimeout(initGGEMU, 100);
             };
             document.head.appendChild(script);
