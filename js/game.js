@@ -35226,7 +35226,7 @@ SceneGame.prototype = {
         SceneGame.instance.HighlightButtons([btnGameTakeWin, btnGameRed, btnGameBlack], !0)
     },
     InitParameters: function () {
-        iWinInc = iWinValue = 0;
+        iCoinsDec = iWinInc = iWinValue = 0;
         iLinesValue = GameData.DEFAULT_LINES;
         iBetValue = GameData.DEFAULT_BET;
         iTotalValue = iLinesValue * iBetValue;
@@ -35495,7 +35495,7 @@ SceneGame.prototype = {
         SceneGame.instance.ResetHighlightedFruits();
         SceneGame.instance.winValue = iWinValue;
         iCoinsValue += iWinValue;
-        if (typeof window.GGEMU !== 'undefined' && window.GGEMU.addBagCoins) { window.GGEMU.addBagCoins(iWinValue).catch(function(){}); }
+        try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.addBagCoins) { window.GGEMU.addBagCoins(iWinValue).catch(function(){}); } } catch (e) { console.warn(e); }
         iCoinsDec = Math.ceil((iShowedCoinsValue - iCoinsValue) / 40);
         LOG("iCoinsDec = " + iCoinsDec);
         0 == iCoinsDec && (iCoinsDec = iShowedCoinsValue > iCoinsValue ? 1 : -1);
@@ -35573,7 +35573,7 @@ SceneGame.prototype = {
                     drummSpeedDelay[c] = b,
                     b += 410);
             a || (iCoinsValue -= iTotalValue,
-                (typeof window.GGEMU !== 'undefined' && window.GGEMU.useBagCoins ? window.GGEMU.useBagCoins(iTotalValue).catch(function(){}) : null),
+                (function(){ try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.useBagCoins) window.GGEMU.useBagCoins(iTotalValue).catch(function(){}); } catch(e) { console.warn(e); } })(),
                 iCoinsDec = Math.ceil((iShowedCoinsValue - iCoinsValue) / 40),
                 gameState.saveProfile());
             SceneGame.instance.HighlightButtons([btnGameLine, btnGameDecCoins, btnGameIncCoins, btnGameSpin], !0);

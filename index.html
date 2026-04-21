@@ -109,8 +109,8 @@
                     demo: 'fruit-slot-machine',
                 });
                 
-                window.GGEMU.getBagStatus().catch(function(e) { console.warn(e); });
-                window.GGEMU.startLive().catch(function(e) { console.warn(e); });
+                try { window.GGEMU.getBagStatus().catch(function(e) { console.warn(e); }); } catch (e) { console.warn(e); }
+                try { window.GGEMU.startLive().catch(function(e) { console.warn(e); }); } catch (e) { console.warn(e); }
             }
             
             var recoverAudio = function() {
