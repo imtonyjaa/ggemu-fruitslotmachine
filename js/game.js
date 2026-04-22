@@ -34322,9 +34322,10 @@ function setCorrectResolution() {
     game.scale.setGameSize(resolutionX, resolutionY);
     game.scale.refresh()
 }
-; var Preloader = function (a) { }, loaderPosY, _preloader;
+; var Preloader = function (a) { this.created = false; }, loaderPosY, _preloader;
 Preloader.prototype = {
     preload: function () {
+        this.created = false;
         sceneLanguages = null;
         startTime = Date.now();
         this.game.stage.backgroundColor = 0;
@@ -34351,13 +34352,23 @@ Preloader.prototype = {
         game.input.onDown.add(function () {
             game.paused && (game.paused = !1)
         });
-        game.scale.refresh()
+        game.scale.refresh();
+
+        // 增加看门狗定时器，防止加载卡住（超时阈值设为 20 秒）
+        this.game.time.events.add(Phaser.Timer.SECOND * 20, function() {
+            if (!this.created) {
+                console.warn("Preloader watchdog: loading stuck at " + this.game.load.progress + "%. Forcing game start...");
+                this._create();
+            }
+        }, this);
     },
     fileComplete: function (a, b, c, d, e) {
         percentageText.text = a + " %";
         100 <= a && this._create()
     },
     _create: function () {
+        if (this.created) return;
+        this.created = true;
         game.scale.refresh();
         GameSnacks.game.ready();
         imgBtn.inputEnabled = !0;
