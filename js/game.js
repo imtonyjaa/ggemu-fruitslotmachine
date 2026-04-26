@@ -34254,6 +34254,7 @@ Splash.prototype = {
         loadSplash(this.game);
         setCorrectResolution();
         window.addEventListener("resize", function () {
+            setCorrectResolution();
             game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
             game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
             game.scale.pageAlignHorizontally = !0;
@@ -34316,11 +34317,16 @@ function checkOrientation() {
 function setCorrectResolution() {
     resolutionX = window.innerWidth / window.innerHeight * resolutionY + .5;
     isNaN(resolutionX) && (resolutionX = 0);
+    // 移除 1000 像素的上限，允许画布在宽屏下变宽以消除拉伸
     resolutionX > resolutionX_max && (resolutionX = resolutionX_max);
     resolutionX < resolutionX_min && (resolutionX = resolutionX_min);
     resolutionX = Math.floor(resolutionX);
     game.scale.setGameSize(resolutionX, resolutionY);
-    game.scale.refresh()
+    game.scale.refresh();
+
+    if (SceneGame.instance && typeof SceneGame.instance.updateLayout === "function") {
+        SceneGame.instance.updateLayout();
+    }
 }
 ; var Preloader = function (a) { this.created = false; }, loaderPosY, _preloader;
 Preloader.prototype = {
@@ -34355,7 +34361,7 @@ Preloader.prototype = {
         game.scale.refresh();
 
         // 增加看门狗定时器，防止加载卡住（超时阈值设为 20 秒）
-        this.game.time.events.add(Phaser.Timer.SECOND * 20, function() {
+        this.game.time.events.add(Phaser.Timer.SECOND * 20, function () {
             if (!this.created) {
                 console.warn("Preloader watchdog: loading stuck at " + this.game.load.progress + "%. Forcing game start...");
                 this._create();
@@ -34766,8 +34772,8 @@ SceneGame.prototype = {
         tmpCircle1 = new Phaser.Circle(0, 0, 10);
         tmpCircle2 = new Phaser.Circle(0, 0, 10);
         imgGameBackground = grpSceneGame.create(game.width >> 1, game.height >> 1, "pak1", "pozadie2.png");
-        imgGameBackground.width = game.width + 15;
-        imgGameBackground.scale.y = imgGameBackground.scale.x;
+        imgGameBackground.width = game.width;
+        imgGameBackground.height = game.height;
         imgGameBackground.anchor.set(.5);
         bubon_inner = grpSceneGame.create(game.width >> 1, (game.height >> 1) - 55, "pak1", "bubon_inner.png");
         bubon_inner.scale.set(10, 1);
@@ -34996,6 +35002,56 @@ SceneGame.prototype = {
         grpSceneGameAds.add(adsTxt);
         grpSceneGameAds.visible = !1;
         grpSceneGame.add(grpSceneGameAds)
+    },
+    updateLayout: function () {
+        if (!grpSceneGame) return;
+        var centerX = game.width >> 1;
+        var centerY = game.height >> 1;
+
+        if (imgGameBackground) {
+            imgGameBackground.x = centerX;
+            imgGameBackground.y = centerY;
+            imgGameBackground.width = game.width;
+            imgGameBackground.height = game.height;
+        }
+
+        if (bubon_inner) bubon_inner.x = centerX;
+        if (imgGameDrumm) imgGameDrumm.x = centerX;
+        if (imgGameDrumm2) imgGameDrumm2.x = centerX;
+        if (imgGameLogo) imgGameLogo.x = centerX;
+        if (imgGameMiddle) imgGameMiddle.x = centerX;
+        if (imgGameBottom) imgGameBottom.x = centerX;
+
+        if (mask1) mask1.x = centerX - 175;
+        if (mask2) mask2.x = centerX - 50;
+        if (mask3) mask3.x = centerX + 75;
+
+        if (grpSceneGameAds) {
+            if (adsOverlay) {
+                adsOverlay.x = centerX;
+                adsOverlay.y = centerY;
+                adsOverlay.width = 1.1 * game.width;
+                adsOverlay.height = 1.1 * game.height;
+            }
+            if (adsTxt) {
+                adsTxt.x = centerX;
+                adsTxt.y = centerY;
+            }
+        }
+
+        // 处理 Overlay 和其他全局全屏元素
+        if (typeof imgOverlay !== 'undefined' && imgOverlay) {
+            imgOverlay.x = centerX;
+            imgOverlay.y = centerY;
+            imgOverlay.width = game.width;
+            imgOverlay.height = game.height;
+        }
+        if (typeof adinplay_overlay !== 'undefined' && adinplay_overlay) {
+            adinplay_overlay.x = centerX;
+            adinplay_overlay.y = centerY;
+            adinplay_overlay.width = game.width;
+            adinplay_overlay.height = game.height;
+        }
     },
     updateTexts: function () {
         SceneGame.instance.SetBitmapText(btnGameLine.txtCaption, STR("LINE"), 25, 70);
@@ -35506,7 +35562,7 @@ SceneGame.prototype = {
         SceneGame.instance.ResetHighlightedFruits();
         SceneGame.instance.winValue = iWinValue;
         iCoinsValue += iWinValue;
-        try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.addBagCoins) { window.GGEMU.addBagCoins(iWinValue).catch(function(){}); } } catch (e) { console.warn(e); }
+        try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.addBagCoins) { window.GGEMU.addBagCoins(iWinValue).catch(function () { }); } } catch (e) { console.warn(e); }
         iCoinsDec = Math.ceil((iShowedCoinsValue - iCoinsValue) / 40);
         LOG("iCoinsDec = " + iCoinsDec);
         0 == iCoinsDec && (iCoinsDec = iShowedCoinsValue > iCoinsValue ? 1 : -1);
@@ -35584,7 +35640,7 @@ SceneGame.prototype = {
                     drummSpeedDelay[c] = b,
                     b += 410);
             a || (iCoinsValue -= iTotalValue,
-                (function(){ try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.useBagCoins) window.GGEMU.useBagCoins(iTotalValue).catch(function(){}); } catch(e) { console.warn(e); } })(),
+                (function () { try { if (typeof window.GGEMU !== 'undefined' && window.GGEMU.useBagCoins) window.GGEMU.useBagCoins(iTotalValue).catch(function () { }); } catch (e) { console.warn(e); } })(),
                 iCoinsDec = Math.ceil((iShowedCoinsValue - iCoinsValue) / 40),
                 gameState.saveProfile());
             SceneGame.instance.HighlightButtons([btnGameLine, btnGameDecCoins, btnGameIncCoins, btnGameSpin], !0);
@@ -37234,7 +37290,7 @@ function reloadPage() {
     window.location.reload(!0)
 }
 ; var resolutionX_min = 490
-    , resolutionX_max = 1E3
+    , resolutionX_max = 3000
     , resolutionY = 880
     , resolutionX = resolutionX_max
     , languageLoaded = !1
@@ -37413,7 +37469,7 @@ function showInterstitialAd(a, b, c) {
 }
 window.serverCoinsValue = undefined;
 var _getProfileVar = getProfileVar;
-getProfileVar = function(a) {
+getProfileVar = function (a) {
     if (a === "iCoinsValue") {
         if (typeof window.serverCoinsValue !== 'undefined') {
             return window.serverCoinsValue;
@@ -37424,7 +37480,7 @@ getProfileVar = function(a) {
     return _getProfileVar(a);
 };
 
-window.syncGcoins = function(serverCoins) {
+window.syncGcoins = function (serverCoins) {
     window.serverCoinsValue = serverCoins;
     if (typeof GameData !== 'undefined') {
         GameData.DEFAULT_COINS = serverCoins;
