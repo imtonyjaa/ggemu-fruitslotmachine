@@ -34457,7 +34457,7 @@ console.info("%c %c   " + GameData.CreditsStaff + " | " + GameData.BuildTitle.re
 GameData.PAYLINE_COLOR = "#ff8800 #ffff00 #88ff00 #00ff88 #00ffff #0088ff #8800ff #ff00ff #ff0088".split(" ");
 GameData.DEFAULT_LINES = 9;
 GameData.DEFAULT_BET = 5;
-GameData.DEFAULT_COINS = 1500;
+GameData.DEFAULT_COINS = 100;
 GameData.TUTORIAL_DEFAULT_LINES = 6;
 GameData.TUTORIAL_DEFAULT_BET = 3;
 GameData.MAX_BET = 999;
@@ -35373,15 +35373,9 @@ SceneGame.prototype = {
             iLinesValue++;
             iLinesValue > drummLines.length && (iLinesValue -= drummLines.length);
             iTotalValue = iLinesValue * iBetValue;
-            for (var a = !1; iTotalValue > iCoinsValue;)
-                iLinesValue--,
-                    iTotalValue = iLinesValue * iBetValue,
-                    a = !0;
-            a && SceneGame.instance.HighlightWinTitle(winCoins, 500);
             gameState.saveProfile();
-            a ? (winLineTitle.zvyraznit.visible = !1,
-                winTotalTitle.zvyraznit.visible = !1) : (winLineTitle.zvyraznit.visible = !0,
-                    winTotalTitle.zvyraznit.visible = !0);
+            winLineTitle.zvyraznit.visible = !0;
+            winTotalTitle.zvyraznit.visible = !0;
             SceneGame.instance.UpdateLines();
             SceneGame.instance.UpdateScreenControls()
         }
@@ -35403,16 +35397,11 @@ SceneGame.prototype = {
     IncCoins: function (a) {
         if (!bDrummsSpinning) {
             void 0 === a && (a = 1);
-            zvyraznit = !0;
             iBetValue += a;
-            for (iTotalValue = iLinesValue * iBetValue; iTotalValue > iCoinsValue;)
-                iBetValue--,
-                    iTotalValue = iLinesValue * iBetValue,
-                    zvyraznit = !1;
+            iTotalValue = iLinesValue * iBetValue;
             gameState.saveProfile();
-            zvyraznit ? (winBetTitle.zvyraznit.visible = !0,
-                winTotalTitle.zvyraznit.visible = !0) : (winBetTitle.zvyraznit.visible = !1,
-                    winTotalTitle.zvyraznit.visible = !1);
+            winBetTitle.zvyraznit.visible = !0;
+            winTotalTitle.zvyraznit.visible = !0;
             SceneGame.instance.UpdateScreenControls();
             SceneGame.instance.HighlightWinTitle(winBet);
             SceneGame.instance.HighlightWinTitle(winBetTitle)
@@ -35598,18 +35587,6 @@ SceneGame.prototype = {
                     SceneGame.instance.HighlightButtons([btnGameLine, btnGameDecCoins, btnGameIncCoins, btnGameSpin])))
     },
     RecalcBetValue: function () {
-        if (!(0 < iWinValue || iTotalValue <= iCoinsValue))
-            if (0 >= iCoinsValue)
-                SceneGameOver.instance.ShowAnimated(!0),
-                    onGameOver(GAME_OVER_LOSE);
-            else {
-                for (; iTotalValue > iCoinsValue && 1 < iBetValue;)
-                    SceneGame.instance.DecCoins(1);
-                for (; iTotalValue > iCoinsValue;)
-                    iLinesValue--,
-                        iTotalValue = iLinesValue * iBetValue,
-                        SceneGame.instance.UpdateScreenControls()
-            }
     },
     OnSpinButtonPressed: function () {
         showInterstitialAd();
@@ -35631,6 +35608,10 @@ SceneGame.prototype = {
     StartSpinningCallback: function (a) {
         void 0 == a && (a = !1);
         if (!bDrummsSpinning) {
+            if (!a && iCoinsValue < iTotalValue) {
+                console.warn("金币不足，无法 SPIN");
+                return;
+            }
             bBulgarianVar = !1;
             soundManager.playSound("button");
             soundManager.playSound("drumm_spinning");
