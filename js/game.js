@@ -37259,13 +37259,17 @@ GameState.prototype = {
 };
 function showDiv(a, b) {
     null == b && (b = !1);
-    if (!game.device.desktop || b)
-        document.getElementById(a).style.display = "block"
+    if (!game.device.desktop || b) {
+        var c = document.getElementById(a);
+        c && (c.style.display = "block")
+    }
 }
 function hideDiv(a, b) {
     null == b && (b = !1);
-    if (!game.device.desktop || b)
-        document.getElementById(a).style.display = "none"
+    if (!game.device.desktop || b) {
+        var c = document.getElementById(a);
+        c && (c.style.display = "none")
+    }
 }
 function reloadPage() {
     window.location.reload(!0)
